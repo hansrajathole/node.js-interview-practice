@@ -103,3 +103,18 @@ module.exports.loginController = async (req, res) => {
         })
     }
 }
+
+
+module.exports.meController = async (req, res) => {
+    try {
+        const user = req.user
+        if(!user){
+            return res.status(400).json({message : "Unauthorized : user not found"})
+        }
+
+        res.status(200).json({message : "verified successfully" , user})
+    } catch (error) {
+        console.log("error in meController : ", error.message);
+        return res.status(500).json({message : "error in meController : " , error : error.message})
+    }
+}
