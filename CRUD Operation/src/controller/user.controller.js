@@ -1,7 +1,8 @@
 const {validationResult} = require("express-validator")
 const userModel = require("../models/user.model")
-const bcrypt = require("bcrypt")
-module.exports.userCreate = async (req, res)=>{
+
+
+module.exports.registerController = async (req, res)=>{
 
     const {username , email  , password} = req.body
 
@@ -38,7 +39,7 @@ module.exports.userCreate = async (req, res)=>{
             return res.status(400).json({message : "User already exists"})
         }
 
-        const hashedPassword = await bcrypt.hash(password,10)
+        const hashedPassword = await userModel.hashedPassword(password)
 
         const newUser = await userModel.create({
             username,
@@ -57,4 +58,48 @@ module.exports.userCreate = async (req, res)=>{
         })
     }
 
+}
+
+
+module.exports.loginController = async (req, res) => {
+    try {
+        const {email , username , password} = req.body
+
+        const errors = validationResult(res)
+        if(!errors.isEmpty()){
+            return res.status(400).json({message : errors.array()[0].msg})
+        }
+
+        if(!email && !username){
+            return res.status(400).json({message : "username or email must be required"})
+        }
+
+        if(!password){
+            return res.status(400).json({message : "password must be required"})
+        }
+
+        const user = await userModel.findOne({
+            $or : [
+                {email : email} , {username : username}
+            ]
+        }).select("+password")
+
+        const isMatch = await user.comparePassword(password)
+        
+        if(!isMatch){
+            return res.status(400).json({message : "incredencial error"})
+        }
+
+        const token = await user.generateAuthToken()
+        delete user._doc.password
+        res.status(200).json({message : "login successfully" , user , token})
+
+
+    } catch (error) {
+        console.log("error in login controller : ", error.message);
+        res.status(500).json({
+            message: "Error in loginController",
+            error: error.message
+        })
+    }
 }
