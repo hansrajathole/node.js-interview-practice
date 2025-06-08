@@ -18,11 +18,11 @@ const userSchema = mongoose.Schema({
     },
     password : {
         type : String,
+        minLength : [6 , "password must be at least 6 character long"],
         required : true,
         select : false
-
     }
 })
 
-const userModel = mongoose.model(userSchema)
+const userModel = mongoose.model("User",userSchema)
 module.exports = userModel
