@@ -6,6 +6,8 @@ const router = Router()
 
 router.post("/register", expressValidation.registerValidator , userController.registerController)
 router.post("/login", expressValidation.loginValidator , userController.loginController)
+router.patch('/update' , protected , userController.updateProfile)
+router.delete("/delete" , protected , userController.deleteController)
 router.get("/me" , protected , userController.meController)
 
 
